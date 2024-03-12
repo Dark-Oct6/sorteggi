@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probabilità dei sorteggi</title>
+    <style>
+        ::-webkit-scrollbar {
+            width: 15px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1b26;
+            box-shadow: inset 0 0 5px #090a15;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3c3d48;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5e5f6a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1b26;
+            color: #e5e4d9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h3 {
+            text-align: center;
+        }
+
+        button:hover {
+            cursor: pointer;
+        }
+
+        .main-screen {
+            margin: 0 20%;
+        }
+
+        .split-screen {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        .half-screen {
+            width: 45%;
+            margin-top: 25px;
+        }
+
+        .formula {
+            font-family: monospace;
+            background-color: #2b2c35;
+            width: fit-content;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        canvas {
+            width: 300px;
+            height: 300px;
+            transform: rotateX(180deg)
+        }
+    </style>
+</head>
+<body>
+    <div class="main-screen">
+        <h1>Probabilità dei sorteggi</h1>
+        <p>Numero pagine</p>
+        <input type="number" min="1" id="pages">
+        <p>Numero massimo</p>
+        <input type="number" min="1" id="range">
+        <p><input type="checkbox" id="safe"> <label for="safe">consenti valori oltre il limite (10000, 100)</label></p>
+        <button onclick="calculate()">Calcola</button>
+        <div class="split-screen">
+            <div class="half-screen">
+                <h3>Probabilità</h3>
+                <div class="formula" id="left"></div>
+                <br>
+                <canvas id="graph" height="1000" width="1000"></canvas>
+            </div>
+            <div class="half-screen">
+                <h3>Somme</h3>
+                <div class="formula" id="right"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    'use strict'
+
+    function sumDigits(x) {
+        if (x === 0) {
+            return 0
+        }
+
+        let e = Math.floor(Math.log10(x)) + 1
+        let sum = 0
+
+        for (let i = 0; i < e; i++) {
+            sum += Math.floor(x % 10 ** (i + 1) / 10 ** i)
+        }
+
+        return sum
+    }
+
+    let sumList = {}
+
+    function calculate() {
+        let pages = document.getElementById('pages').value
+        let range = document.getElementById('range').value
+        let right = document.getElementById('right')
+        let left = document.getElementById('left')
+
+        if (((pages < 1 || range < 1) || (pages > 1e4 || range > 1e2) && !document.getElementById('safe').checked)) {
+            alert('Valori troppo grandi/piccoli')
+            return
+        }
+
+        document.getElementsByTagName('html')[0].style.cursor = 'wait'
+
+        sumList = {}
+        for (let i = 1; i <= range; i++) {
+            sumList[i] = 0
+        }
+
+        right.innerHTML = ''
+        for (let i = 1; i <= pages; i++) {
+            let n = sumDigits(i)
+
+            if (n > range) {
+                right.innerHTML += '<s>' + i +': ' + n + '</s><br>'
+                continue
+            }
+
+            right.innerHTML += i +': ' + n + '<br>'
+
+            sumList[n]++
+        }
+
+        left.innerHTML = ''
+        for (let i = 1; i <= range; i++) {
+            left.innerHTML += i + ': ' + sumList[i] / pages * 100 + '% (' + sumList[i] + ')<br>'
+        }
+
+        let max = 0
+        for (let i = 1; i <= range; i++) {
+            max = Math.max(max, sumList[i])
+        }
+
+        const graph = document.getElementById('graph')
+        const ctx = graph.getContext('2d')
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(0, 0, 1000, 1000)
+        ctx.fillStyle = '#ffffff'
+        for (let i = 1; i <= range; i++) {
+            let coordinates = [
+                1000 / range * (i - 1),
+                0,
+                1000 / range,
+                1000 * sumList[i] / max
+            ]
+            ctx.fillRect(coordinates[0], coordinates[1], coordinates[2], coordinates[3])
+        }
+
+        document.getElementsByTagName('html')[0].style.cursor = 'default'
+    }
+</script>
+</html>
