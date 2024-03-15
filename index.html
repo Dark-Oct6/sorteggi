@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Probabilità dei sorteggi</title>
     <style>
+        @media (min-width: 1100px) {
+            .split-screen {
+                display: flex;
+                justify-content: space-evenly;
+            }
+
+            .half-screen {
+                width: 45%;
+                margin-top: 25px;
+            }
+        }
+
         ::-webkit-scrollbar {
             width: 15px;
         }
@@ -50,16 +62,6 @@
             margin: 0 20%;
         }
 
-        .split-screen {
-            display: flex;
-            justify-content: space-evenly;
-        }
-
-        .half-screen {
-            width: 45%;
-            margin-top: 25px;
-        }
-
         .formula {
             font-family: monospace;
             background-color: #2b2c35;
@@ -78,11 +80,19 @@
 <body>
     <div class="main-screen">
         <h1>Probabilità dei sorteggi</h1>
+        <p>Modello</p>
+        <select id="model">
+            <option value="uniform">Uniforme</option>
+            <option value="no-outer">no-val-est</option>
+        </select>
         <p>Numero pagine</p>
         <input type="number" min="1" id="pages">
         <p>Numero massimo</p>
         <input type="number" min="1" id="range">
-        <p><input type="checkbox" id="safe"> <label for="safe">consenti valori oltre il limite (10000, 100)</label></p>
+        <p>
+            <input type="checkbox" id="safe">
+            <label for="safe">consenti valori oltre il limite (10000, 100)</label>
+        </p>
         <button onclick="calculate()">Calcola</button>
         <div class="split-screen">
             <div class="half-screen">
@@ -119,12 +129,21 @@
     let sumList = {}
 
     function calculate() {
-        let pages = document.getElementById('pages').value
+        let model = document.getElementById('model').value
+
+        let pages = [1, document.getElementById('pages').value]
+        let pageRange = pages[1]
+        if (model === 'no-outer') {
+            pages[0] += Math.min(Math.round((pageRange * 0.05) ** 0.9 + 10), 50)
+            pages[1] -= Math.min(Math.round((pageRange * 0.05) ** 0.9 + 10), 50)
+            pageRange = pages[1] - pages[0] + 1
+        }
+
         let range = document.getElementById('range').value
         let right = document.getElementById('right')
         let left = document.getElementById('left')
 
-        if (((pages < 1 || range < 1) || (pages > 1e4 || range > 1e2) && !document.getElementById('safe').checked)) {
+        if (((pageRange < 1 || range < 1) || (pageRange > 1e4 || range > 1e2) && !document.getElementById('safe').checked)) {
             alert('Valori troppo grandi/piccoli')
             return
         }
@@ -137,7 +156,7 @@
         }
 
         right.innerHTML = ''
-        for (let i = 1; i <= pages; i++) {
+        for (let i = pages[0]; i <= pages[1]; i++) {
             let n = sumDigits(i)
 
             if (n > range) {
@@ -152,7 +171,7 @@
 
         left.innerHTML = ''
         for (let i = 1; i <= range; i++) {
-            left.innerHTML += i + ': ' + sumList[i] / pages * 100 + '% (' + sumList[i] + ')<br>'
+            left.innerHTML += i + ': ' + (sumList[i] / pageRange * 100).toFixed(5) + '% (1/' + (pageRange / sumList[i]).toFixed(3) + '); (' + sumList[i] + ')<br>'
         }
 
         let max = 0
