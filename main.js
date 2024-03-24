@@ -19,12 +19,11 @@ let sumList = {}
 
 function calculate() {
     let model = document.getElementById('model').value
-    if (model === 'PH') {alert('non ancora'); return}
     const strenght = document.getElementById('model-strenght').value - 0
 
     let pages = [1, document.getElementById('pages').value]
     let pageRange = pages[1]
-    if (model === 'no-outer') {
+    if (model === 'lib_no_est') {
         pages[0] += Math.round(Math.min(((pageRange * 0.05) ** 0.9 + 10), 50) ** (0.5 + strenght))
         pages[1] -= Math.round(Math.min(((pageRange * 0.05) ** 0.9 + 10), 50) ** (0.5 + strenght))
         pageRange = pages[1] - pages[0] + 1
@@ -39,19 +38,20 @@ function calculate() {
         return
     }
 
-    document.getElementsByTagName('html')[0].style.cursor = 'wait'
-
     sumList = {}
     for (let i = 1; i <= range; i++) {
         sumList[i] = 0
     }
 
     right.innerHTML = ''
+    const discard = document.getElementById('discard-0').checked
     for (let i = pages[0]; i <= pages[1]; i++) {
         let n = sumDigits(i)
 
         if (n > range) {
-            right.innerHTML += '<s>' + i +': ' + n + '</s><br>'
+            if (discard) {
+                right.innerHTML += '<s>' + i +': ' + n + '</s><br>'
+            }
             continue
         }
 
@@ -84,11 +84,16 @@ function calculate() {
         ]
         ctx.fillRect(coordinates[0], coordinates[1], coordinates[2], coordinates[3])
     }
-
-    document.getElementsByTagName('html')[0].style.cursor = 'default'
 }
 
 document.getElementById("model-strenght").addEventListener("input", function() {
     const strenght = document.getElementById('model-strenght').value
     document.getElementById('strenght-display').innerHTML = (strenght - 0).toFixed(3)
 });
+
+function toggleList() {
+    const list = document.getElementById('list')
+    const disp = list.style.display
+    list.style.display = disp === 'none' ? 'block' : 'none'
+}
+toggleList()

@@ -11,9 +11,8 @@
         <h1>Probabilità dei sorteggi</h1>
         <p>Modello</p>
         <select id="model">
-            <option value="uniform">lib-uni</option>
-            <option value="no-outer">lib-no-est</option>
-            <option value="PH">val-li</option>
+            <option value="lib_uni">lib-uni</option>
+            <option value="lib_no_est">lib-no-est</option>
         </select>
         <p>Potenza (<span id="strenght-display">0.500</span>)</p>
         <input type="range" min="0" max="1" value="0.5" step="0.001" id="model-strenght">
@@ -23,15 +22,51 @@
         <input type="number" min="1" id="range">
         <p>
             <input type="checkbox" id="safe">
-            <label for="safe">consenti valori oltre il limite (10000, 100)</label>
+            <label for="safe">consenti valori oltre il limite (10000, 100).</label>
+            <br>
+            <input type="radio" name="discard" id="discard-0">
+            <label for="discard-0">Barra valori fuori intervallo.</label>
+            <br>
+            <input type="radio" checked="checked" name="discard" id="discard-1">
+            <label for="discard-1">Ignora valori fuori intervallo.</label>
         </p>
         <button onclick="calculate()">Calcola</button>
+
         <div class="split-screen">
             <div class="half-screen">
                 <h3>Probabilità</h3>
                 <div class="formula" id="left"></div>
                 <br>
                 <canvas id="graph" height="1000" width="1000"></canvas>
+                <div>
+                    A partire dal 18, ogni numero richiede almeno
+                    <p class="formula">99 + 100 * (n - 18)</p>
+                    pagine per poter uscire.
+                </div>
+                <p class="collapse" onclick="toggleList()">Numeri 1-17:</p>
+                <ol id="list">
+                    <li>1</li>
+                    <li>2</li>
+                    <li>3</li>
+                    <li>4</li>
+                    <li>5</li>
+                    <li>6</li>
+                    <li>7</li>
+                    <li>8</li>
+                    <li>9</li>
+                    <li>19</li>
+                    <li>29</li>
+                    <li>39</li>
+                    <li>49</li>
+                    <li>59</li>
+                    <li>69</li>
+                    <li>79</li>
+                    <li>89</li>
+                </ol>
+                <p>
+                    Il grafico rappresenta la probabilità di ogni numero di venire estratto rispetto agli altri numeri considerando solo i casi in
+                    cui viene estratto un numero nell'intervallo.
+                </p>
             </div>
             <div class="half-screen">
                 <h3>Somme</h3>
